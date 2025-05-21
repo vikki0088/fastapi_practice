@@ -1,4 +1,6 @@
-from fastapi import APIRouter,Depends,HTTPException,status
+from fastapi import APIRouter,Depends,HTTPException,status,Request
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 from fastapi.security import OAuth2PasswordRequestForm,OAuth2PasswordBearer
 from routes.databse import db_dependency
 from routes.models import Users
@@ -12,6 +14,10 @@ router = APIRouter(
     prefix='/auth'
 )
 
+templates = Jinja2Templates(directory='./templates')
+router.mount("/static",StaticFiles(directory="static"),name="static")
+
+
 # Create a CryptContext instance with bcrypt as default scheme
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -20,7 +26,20 @@ SECRET_KEY = secrets.token_urlsafe(64)
 ALGORITHM = 'HS256'
 
 
+#### pages #####
 
+@router.get("/login-page")
+def render_login_page(request: Request):
+    return templates.TemplateResponse("login.html",{'request': request})
+
+
+@router.get("/register-page")
+def render_login_page(request: Request):
+    return templates.TemplateResponse("register.html",{'request': request})
+
+
+
+######end points ##########
 def create_access_token(username: str,user_id: int,role:str,expires_delta: timedelta):
     encode = {
         "username": username,
